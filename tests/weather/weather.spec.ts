@@ -37,6 +37,23 @@ test("Смена города", async ({ page }: { page: Page }) => {
 	await expect(page.locator("h5.location")).toContainText(KrasnodarCity);
 });
 
+test.describe("Геопозиция", () => {
+	test.use({
+		geolocation: { longitude: 38.9764814, latitude: 45.0352718 },
+		permissions: ["geolocation"],
+	});
+
+	test("Определение геопозиции", async ({ page }: { page: Page }) => {
+		await page
+			.getByTestId("geo-detection")
+			.filter({ has: page.locator("button") })
+			.click();
+
+		await expect(page.locator(".main")).toBeVisible();
+		await expect(page.locator("h5.location")).toContainText(KrasnodarCity);
+	});
+});
+
 test("Поиск несуществующего города и отображение ошибки", async ({ page }: { page: Page }) => {
 	await page.locator(".search-city input").fill("Не существует города");
 	await page.locator(".search-city input").press("Enter");
