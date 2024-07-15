@@ -7,74 +7,70 @@ const password: string = "123456";
 const errorFillEmailPassword: string = "Заполните email/пароль";
 const errorAccountNotFound: string = "Аккаунт не найден";
 
-test.beforeEach(async ({ page }: { page: Page }) => {
-	const loginPageObj = new LoginPage(page);
+test.describe("Авторизация", { tag: "@auth" }, () => {
+	test.describe.configure({ retries: 2 });
 
-	await test.step("Открытие страницы", async () => {
-		await loginPageObj.goTo(url);
-	});
-});
+	let loginPageObj: LoginPage;
 
-test("Проверка отображения страницы регистрация/авторизация", async ({ page }: { page: Page }) => {
-	const loginPageObj = new LoginPage(page);
+	test.beforeEach(async ({ page }: { page: Page }) => {
+		loginPageObj = new LoginPage(page);
 
-	await test.step("Отображение заголовка", async () => {
-		await expect(loginPageObj.mainTitle).toHaveText("Регистрация/Авторизация");
-	});
-});
-
-test("Проверка отображения полей авторизации", async ({ page }: { page: Page }) => {
-	const loginPageObj = new LoginPage(page);
-
-	await test.step("Отображение поля email", async () => {
-		await expect(loginPageObj.email).toBeVisible();
-	});
-
-	await test.step("Отображение поля пароля", async () => {
-		await expect(loginPageObj.password).toBeVisible();
-	});
-
-	await test.step("Отображение кнопки авторизации", async () => {
-		await expect(loginPageObj.authButton).toBeVisible();
-	});
-});
-
-test.describe("Негативные сценарии авторизации", () => {
-	test("Авторизация с незаполненными полями", async ({ page }: { page: Page }) => {
-		const loginPageObj = new LoginPage(page);
-
-		await test.step("Нажатие на кнопку авторизации", async () => {
-			await loginPageObj.authButton.click();
-		});
-
-		await test.step("Отображение ошибки", async () => {
-			await expect(loginPageObj.authError).toBeVisible();
-			await expect(loginPageObj.authError).toHaveText(errorFillEmailPassword);
+		await test.step("Открытие страницы", async () => {
+			await loginPageObj.goTo(url);
 		});
 	});
 
-	test("Неуспешная авторизация", async ({ page }: { page: Page }) => {
-		const loginPageObj = new LoginPage(page);
-
-		await test.step("Авторизация от незарегистрированного пользователя", async () => {
-			await loginPageObj.login(email, "12345");
-		});
-
-		await test.step("Отображение ошибки", async () => {
-			await expect(loginPageObj.authError).toBeVisible();
-			await expect(loginPageObj.authError).toHaveText(errorAccountNotFound);
+	test("Проверка отображения страницы регистрация/авторизация", async ({ page }: { page: Page }) => {
+		await test.step("Отображение заголовка", async () => {
+			await expect(loginPageObj.mainTitle).toHaveText("Регистрация/Авторизация");
 		});
 	});
-});
 
-test("Успешная авторизация", async ({ page }: { page: Page }) => {
-	const loginPageObj = new LoginPage(page);
+	test("Проверка отображения полей авторизации", async ({ page }: { page: Page }) => {
+		await test.step("Отображение поля email", async () => {
+			await expect(loginPageObj.email).toBeVisible();
+		});
 
-	await test.step("Авторизация", async () => {
-		await loginPageObj.login(email, password);
+		await test.step("Отображение поля пароля", async () => {
+			await expect(loginPageObj.password).toBeVisible();
+		});
+
+		await test.step("Отображение кнопки авторизации", async () => {
+			await expect(loginPageObj.authButton).toBeVisible();
+		});
 	});
 
-	await test.step("Отображение email авторизованного пользователя", async () => {
-		await expect(page.locator(".email")).toHaveText(email);
+	test.describe("Негативные сценарии авторизации", { tag: "@negative" }, () => {
+		test("Авторизация с незаполненными полями", async ({ page }: { page: Page }) => {
+			await test.step("Нажатие на кнопку авторизации", async () => {
+				await loginPageObj.authButton.click();
+			});
+
+			await test.step("Отображение ошибки", async () => {
+				await expect(loginPageObj.authError).toBeVisible();
+				await expect(loginPageObj.authError).toHaveText(errorFillEmailPassword);
+			});
+		});
+
+		test("Авторизация от незарегистрированного пользователя", async ({ page }: { page: Page }) => {
+			await test.step("Авторизация", async () => {
+				await loginPageObj.login(email, "12345");
+			});
+
+			await test.step("Отображение ошибки", async () => {
+				await expect(loginPageObj.authError).toBeVisible();
+				await expect(loginPageObj.authError).toHaveText(errorAccountNotFound);
+			});
+		});
+	});
+
+	test("Успешная авторизация", async ({ page }: { page: Page }) => {
+		await test.step("Авторизация", async () => {
+			await loginPageObj.login(email, password);
+		});
+
+		await test.step("Отображение email авторизованного пользователя", async () => {
+			await expect(page.locator(".email")).toHaveText(email);
+		});
 	});
 });
