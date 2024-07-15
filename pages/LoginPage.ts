@@ -17,6 +17,10 @@ export default class LoginPage {
 		this.mainTitle = page.locator(".title");
 	}
 
+	async goTo(url: string) {
+		await this.page.goto(url);
+	}
+
 	async login(email: string, password: string) {
 		await this.email.fill(email);
 		await this.password.fill(password);

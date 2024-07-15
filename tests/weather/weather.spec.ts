@@ -1,4 +1,6 @@
 import { test, expect, Page } from "@playwright/test";
+import LoginPage from "../../pages/LoginPage";
+import WeatherPage from "../../pages/WeatherPage";
 
 const url: string = "https://andtaran.github.io/weather_react/";
 const email: string = "test1@test.ru";
@@ -7,77 +9,78 @@ const MoscowCity: string = "Москва";
 const KrasnodarCity: string = "Краснодар";
 
 test.beforeEach(async ({ page }: { page: Page }) => {
-	await page.goto(url);
-	await page.locator(".auth-email input").fill(email);
-	await page.locator(".auth-password input").fill(password);
-	await page.getByRole("button", { name: "Авторизация" }).click();
+	const loginPageObj = new LoginPage(page);
+
+	await loginPageObj.goTo(url);
+	await loginPageObj.login(email, password);
 });
 
 test('Отображение страницы "Прогноз погоды"', async ({ page }: { page: Page }) => {
-	await expect(page).toHaveTitle("React App");
-	await expect(page.locator(".title")).toHaveText("Прогноз погоды");
-	await expect(page.locator(".email")).toHaveText(email);
+	const weatherPageObj = new WeatherPage(page);
+
+	await expect(weatherPageObj.headerTitle).toHaveText("Прогноз погоды");
+	await expect(weatherPageObj.title).toHaveText("Прогноз погоды");
 });
 
-test("Поиск города и отображение погоды", async ({ page }: { page: Page }) => {
-	await page.locator(".search-city input").fill(MoscowCity);
-	await page.locator(".search-city input").press("Enter");
-	await expect(page.locator(".main")).toBeVisible();
-	await expect(page.locator("h5.location")).toContainText(MoscowCity);
+test("Поиск города и отображение виджета погоды", async ({ page }: { page: Page }) => {
+	const weatherPageObj = new WeatherPage(page);
+
+	await weatherPageObj.inputSearchCity.fill(MoscowCity);
+	await weatherPageObj.buttonSearchCity.click();
+	await expect(weatherPageObj.widgetWeather).toBeVisible();
+	await expect(weatherPageObj.weatherLocation).toContainText(MoscowCity);
 });
 
 test("Смена города", async ({ page }: { page: Page }) => {
-	await page.locator(".search-city input").fill(MoscowCity);
-	await page.locator(".search-city input").press("Enter");
-	await expect(page.locator("h5.location")).toContainText(MoscowCity);
+	const weatherPageObj = new WeatherPage(page);
 
-	await page.locator(".search-city input").fill(KrasnodarCity);
-	await page.locator(".search-city input").press("Enter");
-	await expect(page.locator(".main")).toBeVisible();
-	await expect(page.locator("h5.location")).toContainText(KrasnodarCity);
+	await weatherPageObj.searchCity(MoscowCity);
+	await expect(weatherPageObj.weatherLocation).toContainText(MoscowCity);
+
+	await weatherPageObj.searchCity(KrasnodarCity);
+	await expect(weatherPageObj.weatherLocation).toContainText(KrasnodarCity);
 });
 
 test.describe("Геопозиция", () => {
 	test.use({
+		// Геолокация города Краснодар
 		geolocation: { longitude: 38.9764814, latitude: 45.0352718 },
 		permissions: ["geolocation"],
 	});
 
 	test("Определение геопозиции", async ({ page }: { page: Page }) => {
-		await page
-			.getByTestId("geo-detection")
-			.filter({ has: page.locator("button") })
-			.click();
+		const weatherPageObj = new WeatherPage(page);
 
-		await expect(page.locator(".main")).toBeVisible();
-		await expect(page.locator("h5.location")).toContainText(KrasnodarCity);
+		await weatherPageObj.buttonGeoDetection.click();
+
+		await expect(weatherPageObj.widgetWeather).toBeVisible();
+		await expect(weatherPageObj.weatherLocation).toContainText(KrasnodarCity);
 	});
 });
 
 test("Поиск несуществующего города и отображение ошибки", async ({ page }: { page: Page }) => {
-	await page.locator(".search-city input").fill("Не существует города");
-	await page.locator(".search-city input").press("Enter");
-	await expect(page.locator("#root")).toContainText("Город не найден...");
-	await expect(page.locator(".main")).not.toBeVisible();
+	const weatherPageObj = new WeatherPage(page);
+
+	await weatherPageObj.searchCity("Не существует города");
+	await expect(weatherPageObj.widgetWeather).not.toBeVisible();
+	await expect(weatherPageObj.weatherError).toBeVisible();
+	await expect(weatherPageObj.weatherError).toHaveText("Город не найден...");
 });
 
 test("Отображение полей в большом виджете", async ({ page }: { page: Page }) => {
-	await page.locator(".search-city input").fill(MoscowCity);
-	await page.locator(".search-city input").press("Enter");
-	await expect(page.locator(".main")).toBeVisible();
+	const weatherPageObj = new WeatherPage(page);
 
-	await expect(page.locator(".location")).toContainText(MoscowCity);
-	await expect(page.locator(".date")).toBeVisible();
-	await expect(page.locator(".weather-icon")).toBeVisible();
-	await expect(page.locator(".weather-temp")).toBeVisible();
-	await expect(page.locator(".temp_description")).toBeVisible();
-	await expect(page.locator(".feels_like")).toBeVisible();
-	await expect(page.locator(".min_temp")).toBeVisible();
-	await expect(page.locator(".max_temp")).toBeVisible();
-	await expect(page.locator(".wind")).toBeVisible();
-	await expect(page.locator(".humidity")).toBeVisible();
-});
+	await weatherPageObj.searchCity(MoscowCity);
+	await expect(weatherPageObj.widgetWeather).toBeVisible();
 
-test.afterEach(async ({ page }: { page: Page }) => {
-	await page.close();
+	await expect(weatherPageObj.weatherLocation).toContainText(MoscowCity);
+	await expect(weatherPageObj.weatherDate).toBeVisible();
+	await expect(weatherPageObj.weatherIcon).toBeVisible();
+	await expect(weatherPageObj.weatherTemp).toBeVisible();
+	await expect(weatherPageObj.weatherDescription).toBeVisible();
+	await expect(weatherPageObj.weatherFeelsLike).toBeVisible();
+	await expect(weatherPageObj.weatherMinTemp).toBeVisible();
+	await expect(weatherPageObj.weatherMaxTemp).toBeVisible();
+	await expect(weatherPageObj.weatherWind).toBeVisible();
+	await expect(weatherPageObj.weatherHumidity).toBeVisible();
 });

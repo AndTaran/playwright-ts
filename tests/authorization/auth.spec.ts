@@ -8,7 +8,9 @@ const errorFillEmailPassword: string = "Заполните email/пароль";
 const errorAccountNotFound: string = "Аккаунт не найден";
 
 test.beforeEach(async ({ page }: { page: Page }) => {
-	await page.goto(url);
+	const loginPageObj = new LoginPage(page);
+
+	await loginPageObj.goTo(url);
 });
 
 test("Проверка отображения страницы регистрация/авторизация", async ({ page }: { page: Page }) => {
