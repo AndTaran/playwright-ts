@@ -1,28 +1,25 @@
-import { test, expect, Page } from "@playwright/test";
-import RegistrationPage from "../../pages/RegistrationPage";
-import LoginPage from "../../pages/LoginPage";
-
-const url: string = "https://andtaran.github.io/weather_react/";
-const randomEmail: string = Math.random().toString(36).substring(2, 11) + "@domain.com";
-const email: string = "test1@test.ru";
-const password: string = "123456";
+import { test, expect } from "@playwright/test";
+import RegistrationPage from "../pages/RegistrationPage";
+import LoginPage from "../pages/LoginPage";
+import WeatherPage from "../pages/WeatherPage";
+import { BaseData, RegistrationData, AuthData } from "../data/data";
 
 test.describe("Регистрация", { tag: "@registration" }, () => {
-	test.describe.configure({ retries: 2 });
-
 	let loginPageObj: LoginPage;
 	let registrationPageObj: RegistrationPage;
+	let weatherPageObj: WeatherPage;
 
 	test.beforeEach(async ({ page }) => {
 		loginPageObj = new LoginPage(page);
 		registrationPageObj = new RegistrationPage(page);
+		weatherPageObj = new WeatherPage(page);
 
 		await test.step("Открытие страницы", async () => {
-			await loginPageObj.goTo(url);
+			await loginPageObj.goTo(BaseData.url);
 		});
 	});
 
-	test("Проверка полей регистрации", async ({ page }: { page: Page }) => {
+	test("Проверка полей регистрации", async ({ page }) => {
 		await test.step("Отображение поля email", async () => {
 			await expect(registrationPageObj.email).toBeVisible();
 		});
@@ -41,28 +38,28 @@ test.describe("Регистрация", { tag: "@registration" }, () => {
 	});
 
 	test.describe("Негативные сценарии регистрации", { tag: "@negative" }, () => {
-		test("Регистрация с пустыми данными", async ({ page }: { page: Page }) => {
+		test("Регистрация с пустыми данными", async ({ page }) => {
 			await test.step("Нажатие на кнопку регистрации", async () => {
 				await registrationPageObj.registrationButton.click();
 			});
 
 			await test.step("Отображение ошибки", async () => {
 				await expect(registrationPageObj.registrationError).toBeVisible();
-				await expect(registrationPageObj.registrationError).toHaveText("Заполните все поля");
+				await expect(registrationPageObj.registrationError).toHaveText(RegistrationData.errorFillFields);
 			});
 		});
 
-		test("Регистрация с некорректным паролем", async ({ page }: { page: Page }) => {
+		test("Регистрация с паролем менее 6 символов", async ({ page }) => {
 			await test.step("Заполнение поля email", async () => {
-				await registrationPageObj.email.fill(email);
+				await registrationPageObj.email.fill(BaseData.email);
 			});
 
 			await test.step("Заполнение поля пароля", async () => {
-				await registrationPageObj.password.fill("12345");
+				await registrationPageObj.password.fill(AuthData.invalidPassword);
 			});
 
 			await test.step("Заполнение поля повторения пароля", async () => {
-				await registrationPageObj.repeatPassword.fill("12345");
+				await registrationPageObj.repeatPassword.fill(AuthData.invalidPassword);
 			});
 
 			await test.step("Нажатие на кнопку регистрации", async () => {
@@ -71,21 +68,21 @@ test.describe("Регистрация", { tag: "@registration" }, () => {
 
 			await test.step("Отображение ошибки", async () => {
 				await expect(registrationPageObj.registrationError).toBeVisible();
-				await expect(registrationPageObj.registrationError).toHaveText("Firebase: Password should be at least 6 characters (auth/weak-password).");
+				await expect(registrationPageObj.registrationError).toHaveText(RegistrationData.errorPasswordLengthAtLeastCharacters);
 			});
 		});
 
-		test("Регистрация с некорректным email", async ({ page }: { page: Page }) => {
+		test("Регистрация с некорректным email", async ({ page }) => {
 			await test.step("Заполнение поля email", async () => {
-				await registrationPageObj.email.fill("test1");
+				await registrationPageObj.email.fill(RegistrationData.invalidEmail);
 			});
 
 			await test.step("Заполнение поля пароля", async () => {
-				await registrationPageObj.password.fill(password);
+				await registrationPageObj.password.fill(BaseData.password);
 			});
 
 			await test.step("Заполнение поля повторения пароля", async () => {
-				await registrationPageObj.repeatPassword.fill(password);
+				await registrationPageObj.repeatPassword.fill(BaseData.password);
 			});
 
 			await test.step("Нажатие на кнопку регистрации", async () => {
@@ -94,21 +91,21 @@ test.describe("Регистрация", { tag: "@registration" }, () => {
 
 			await test.step("Отображение ошибки", async () => {
 				await expect(registrationPageObj.registrationError).toBeVisible();
-				await expect(registrationPageObj.registrationError).toHaveText("Firebase: Error (auth/invalid-email).");
+				await expect(registrationPageObj.registrationError).toHaveText(RegistrationData.errorInvalidEmail);
 			});
 		});
 
-		test("Регистрация с существующим email", async ({ page }: { page: Page }) => {
+		test("Регистрация с существующим email", async ({ page }) => {
 			await test.step("Заполнение поля email", async () => {
-				await registrationPageObj.email.fill(email);
+				await registrationPageObj.email.fill(BaseData.email);
 			});
 
 			await test.step("Заполнение поля пароля", async () => {
-				await registrationPageObj.password.fill(password);
+				await registrationPageObj.password.fill(BaseData.password);
 			});
 
 			await test.step("Заполнение поля повторения пароля", async () => {
-				await registrationPageObj.repeatPassword.fill(password);
+				await registrationPageObj.repeatPassword.fill(BaseData.password);
 			});
 
 			await test.step("Нажатие на кнопку регистрации", async () => {
@@ -117,29 +114,29 @@ test.describe("Регистрация", { tag: "@registration" }, () => {
 
 			await test.step("Отображение ошибки", async () => {
 				await expect(registrationPageObj.registrationError).toBeVisible();
-				await expect(registrationPageObj.registrationError).toHaveText("Firebase: Error (auth/email-already-in-use).");
+				await expect(registrationPageObj.registrationError).toHaveText(RegistrationData.errorEmailAlreadyInUse);
 			});
 		});
 	});
 
 	test("Успешная регистрация", async ({ page }) => {
 		await test.step("Заполнение поля email", async () => {
-			await registrationPageObj.email.fill(randomEmail);
+			await registrationPageObj.email.fill(RegistrationData.randomEmail);
 		});
 
 		await test.step("Заполнение поля пароля", async () => {
-			await registrationPageObj.password.fill(password);
+			await registrationPageObj.password.fill(BaseData.password);
 		});
 
 		await test.step("Заполнение поля повторения пароля", async () => {
-			await registrationPageObj.repeatPassword.fill(password);
+			await registrationPageObj.repeatPassword.fill(BaseData.password);
 		});
 		await test.step("Нажатие на кнопку регистрации", async () => {
 			await registrationPageObj.registrationButton.click();
 		});
 
 		await test.step("Отображение почты зарегистрированного пользователя", async () => {
-			await expect(page.locator(".email")).toHaveText(randomEmail);
+			await expect(weatherPageObj.email).toHaveText(RegistrationData.randomEmail);
 		});
 	});
 });

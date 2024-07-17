@@ -1,32 +1,30 @@
-import { test, expect, Page } from "@playwright/test";
-import LoginPage from "../../pages/LoginPage";
-
-const url: string = "https://andtaran.github.io/weather_react/";
-const email: string = "test1@test.ru";
-const password: string = "123456";
-const errorFillEmailPassword: string = "Заполните email/пароль";
-const errorAccountNotFound: string = "Аккаунт не найден";
+import { test, expect } from "@playwright/test";
+import LoginPage from "../pages/LoginPage";
+import WeatherPage from "../pages/WeatherPage";
+import { BaseData, AuthData } from "../data/data";
 
 test.describe("Авторизация", { tag: "@auth" }, () => {
-	test.describe.configure({ retries: 2 });
+	test.describe.configure({ retries: 1 });
 
 	let loginPageObj: LoginPage;
+	let weatherPageObj: WeatherPage;
 
-	test.beforeEach(async ({ page }: { page: Page }) => {
+	test.beforeEach(async ({ page }) => {
 		loginPageObj = new LoginPage(page);
+		weatherPageObj = new WeatherPage(page);
 
 		await test.step("Открытие страницы", async () => {
-			await loginPageObj.goTo(url);
+			await loginPageObj.goTo(BaseData.url);
 		});
 	});
 
-	test("Проверка отображения страницы регистрация/авторизация", async ({ page }: { page: Page }) => {
+	test("Проверка отображения страницы регистрация/авторизация", async ({ page }) => {
 		await test.step("Отображение заголовка", async () => {
-			await expect(loginPageObj.mainTitle).toHaveText("Регистрация/Авторизация");
+			await expect(loginPageObj.mainTitle).toHaveText(AuthData.title);
 		});
 	});
 
-	test("Проверка отображения полей авторизации", async ({ page }: { page: Page }) => {
+	test("Проверка отображения полей авторизации", async ({ page }) => {
 		await test.step("Отображение поля email", async () => {
 			await expect(loginPageObj.email).toBeVisible();
 		});
@@ -41,36 +39,36 @@ test.describe("Авторизация", { tag: "@auth" }, () => {
 	});
 
 	test.describe("Негативные сценарии авторизации", { tag: "@negative" }, () => {
-		test("Авторизация с незаполненными полями", async ({ page }: { page: Page }) => {
+		test("Авторизация с незаполненными полями", async ({ page }) => {
 			await test.step("Нажатие на кнопку авторизации", async () => {
 				await loginPageObj.authButton.click();
 			});
 
 			await test.step("Отображение ошибки", async () => {
 				await expect(loginPageObj.authError).toBeVisible();
-				await expect(loginPageObj.authError).toHaveText(errorFillEmailPassword);
+				await expect(loginPageObj.authError).toHaveText(AuthData.errorFillEmailPassword);
 			});
 		});
 
-		test("Авторизация от незарегистрированного пользователя", async ({ page }: { page: Page }) => {
+		test("Авторизация от незарегистрированного пользователя", async ({ page }) => {
 			await test.step("Авторизация", async () => {
-				await loginPageObj.login(email, "12345");
+				await loginPageObj.login(BaseData.email, AuthData.invalidPassword);
 			});
 
 			await test.step("Отображение ошибки", async () => {
 				await expect(loginPageObj.authError).toBeVisible();
-				await expect(loginPageObj.authError).toHaveText(errorAccountNotFound);
+				await expect(loginPageObj.authError).toHaveText(AuthData.errorAccountNotFound);
 			});
 		});
 	});
 
-	test("Успешная авторизация", async ({ page }: { page: Page }) => {
+	test("Успешная авторизация", async ({ page }) => {
 		await test.step("Авторизация", async () => {
-			await loginPageObj.login(email, password);
+			await loginPageObj.login(BaseData.email, BaseData.password);
 		});
 
 		await test.step("Отображение email авторизованного пользователя", async () => {
-			await expect(page.locator(".email")).toHaveText(email);
+			await expect(weatherPageObj.email).toHaveText(BaseData.email);
 		});
 	});
 });

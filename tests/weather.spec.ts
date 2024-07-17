@@ -1,15 +1,10 @@
-import { test, expect, Page } from "@playwright/test";
-import LoginPage from "../../pages/LoginPage";
-import WeatherPage from "../../pages/WeatherPage";
-
-const url: string = "https://andtaran.github.io/weather_react/";
-const email: string = "test1@test.ru";
-const password: string = "123456";
-const MoscowCity: string = "Москва";
-const KrasnodarCity: string = "Краснодар";
+import { test, expect } from "@playwright/test";
+import LoginPage from "../pages/LoginPage";
+import WeatherPage from "../pages/WeatherPage";
+import { BaseData, WeatherData } from "../data/data";
 
 test.describe("Прогноз погоды", { tag: "@weather" }, () => {
-	test.describe.configure({ retries: 2 });
+	test.describe.configure({ retries: 1 });
 
 	test.use({
 		// Геолокация города Краснодар
@@ -20,32 +15,32 @@ test.describe("Прогноз погоды", { tag: "@weather" }, () => {
 	let loginPageObj: LoginPage;
 	let weatherPageObj: WeatherPage;
 
-	test.beforeEach(async ({ page }: { page: Page }) => {
+	test.beforeEach(async ({ page }) => {
 		loginPageObj = new LoginPage(page);
 		weatherPageObj = new WeatherPage(page);
 
 		await test.step("Открытие страницы", async () => {
-			await loginPageObj.goTo(url);
+			await loginPageObj.goTo(BaseData.url);
 		});
 
 		await test.step("Авторизация", async () => {
-			await loginPageObj.login(email, password);
+			await loginPageObj.login(BaseData.email, BaseData.password);
 		});
 	});
 
-	test('Отображение страницы "Прогноз погоды"', async ({ page }: { page: Page }) => {
+	test('Отображение страницы "Прогноз погоды"', async ({ page }) => {
 		await test.step("Отображение заголовка в шапке", async () => {
-			await expect(weatherPageObj.headerTitle).toHaveText("Прогноз погоды");
+			await expect(weatherPageObj.headerTitle).toHaveText(WeatherData.title);
 		});
 
 		await test.step("Отображение заголовка на странице", async () => {
-			await expect(weatherPageObj.title).toHaveText("Прогноз погоды");
+			await expect(weatherPageObj.title).toHaveText(WeatherData.title);
 		});
 	});
 
-	test("Поиск города и отображение виджета погоды", async ({ page }: { page: Page }) => {
+	test("Поиск города и отображение виджета погоды", async ({ page }) => {
 		await test.step("Заполнение поля поиска", async () => {
-			await weatherPageObj.inputSearchCity.fill(MoscowCity);
+			await weatherPageObj.inputSearchCity.fill(WeatherData.MoscowCity);
 		});
 
 		await test.step("Нажатие на кнопку поиска", async () => {
@@ -57,29 +52,29 @@ test.describe("Прогноз погоды", { tag: "@weather" }, () => {
 		});
 
 		await test.step("Отображение наименования города", async () => {
-			await expect(weatherPageObj.weatherLocation).toContainText(MoscowCity);
+			await expect(weatherPageObj.weatherLocation).toContainText(WeatherData.MoscowCity);
 		});
 	});
 
-	test("Смена города", async ({ page }: { page: Page }) => {
+	test("Смена города", async ({ page }) => {
 		await test.step("Поиск города", async () => {
-			await weatherPageObj.searchCity(MoscowCity);
+			await weatherPageObj.searchCity(WeatherData.MoscowCity);
 		});
 
 		await test.step("Отображение наименования города в виджете", async () => {
-			await expect(weatherPageObj.weatherLocation).toContainText(MoscowCity);
+			await expect(weatherPageObj.weatherLocation).toContainText(WeatherData.MoscowCity);
 		});
 
 		await test.step("Поиск другого города", async () => {
-			await weatherPageObj.searchCity(KrasnodarCity);
+			await weatherPageObj.searchCity(WeatherData.KrasnodarCity);
 		});
 
 		await test.step("Отображение нового наименования города в виджете", async () => {
-			await expect(weatherPageObj.weatherLocation).toContainText(KrasnodarCity);
+			await expect(weatherPageObj.weatherLocation).toContainText(WeatherData.KrasnodarCity);
 		});
 	});
 
-	test("Определение геопозиции", async ({ page }: { page: Page }) => {
+	test("Определение геопозиции", async ({ page }) => {
 		await test.step("Отображение кнопки для определения геопозиции", async () => {
 			await expect(weatherPageObj.buttonGeoDetection).toBeVisible();
 		});
@@ -93,11 +88,11 @@ test.describe("Прогноз погоды", { tag: "@weather" }, () => {
 		});
 
 		await test.step("Отображение наименования города", async () => {
-			await expect(weatherPageObj.weatherLocation).toContainText(KrasnodarCity);
+			await expect(weatherPageObj.weatherLocation).toContainText(WeatherData.KrasnodarCity);
 		});
 	});
 
-	test("Поиск несуществующего города и отображение ошибки", { tag: "@negative" }, async ({ page }: { page: Page }) => {
+	test("Поиск несуществующего города и отображение ошибки", { tag: "@negative" }, async ({ page }) => {
 		await test.step("Поиск города", async () => {
 			await weatherPageObj.searchCity("Не существует города");
 		});
@@ -108,13 +103,13 @@ test.describe("Прогноз погоды", { tag: "@weather" }, () => {
 
 		await test.step("Отображение ошибки", async () => {
 			await expect(weatherPageObj.weatherError).toBeVisible();
-			await expect(weatherPageObj.weatherError).toHaveText("Город не найден...");
+			await expect(weatherPageObj.weatherError).toHaveText(WeatherData.errorCityNotFound);
 		});
 	});
 
-	test("Проверка переключения между виджетами", async ({ page }: { page: Page }) => {
+	test("Проверка переключения между виджетами", async ({ page }) => {
 		await test.step("Поиск города", async () => {
-			await weatherPageObj.searchCity(MoscowCity);
+			await weatherPageObj.searchCity(WeatherData.MoscowCity);
 		});
 
 		await test.step("Проверка активного таба LG", async () => {
@@ -142,9 +137,9 @@ test.describe("Прогноз погоды", { tag: "@weather" }, () => {
 	});
 
 	test.describe("Виджеты погоды", () => {
-		test("Отображение полей в большом виджете", async ({ page }: { page: Page }) => {
+		test("Отображение полей в большом виджете", async ({ page }) => {
 			await test.step("Поиск города", async () => {
-				await weatherPageObj.searchCity(MoscowCity);
+				await weatherPageObj.searchCity(WeatherData.MoscowCity);
 			});
 
 			await test.step("Отображение виджета погоды", async () => {
@@ -152,7 +147,7 @@ test.describe("Прогноз погоды", { tag: "@weather" }, () => {
 			});
 
 			await test.step("Отображение наименования города", async () => {
-				await expect(weatherPageObj.weatherLocation).toContainText(MoscowCity);
+				await expect(weatherPageObj.weatherLocation).toContainText(WeatherData.MoscowCity);
 			});
 
 			await test.step("Отображение даты в виджете", async () => {
@@ -192,9 +187,9 @@ test.describe("Прогноз погоды", { tag: "@weather" }, () => {
 			});
 		});
 
-		test("Отображение полей в среднем виджете", async ({ page }: { page: Page }) => {
+		test("Отображение полей в среднем виджете", async ({ page }) => {
 			await test.step("Поиск города", async () => {
-				await weatherPageObj.searchCity(MoscowCity);
+				await weatherPageObj.searchCity(WeatherData.MoscowCity);
 			});
 
 			await test.step("Переключение на таб MD", async () => {
@@ -206,7 +201,7 @@ test.describe("Прогноз погоды", { tag: "@weather" }, () => {
 			});
 
 			await test.step("Отображение наименования города", async () => {
-				await expect(weatherPageObj.weatherLocationMd).toContainText(MoscowCity);
+				await expect(weatherPageObj.weatherLocationMd).toContainText(WeatherData.MoscowCity);
 			});
 
 			await test.step("Отображение иконки погоды", async () => {
@@ -226,9 +221,9 @@ test.describe("Прогноз погоды", { tag: "@weather" }, () => {
 			});
 		});
 
-		test("Отображение полей в малом виджете", async ({ page }: { page: Page }) => {
+		test("Отображение полей в малом виджете", async ({ page }) => {
 			await test.step("Поиск города", async () => {
-				await weatherPageObj.searchCity(MoscowCity);
+				await weatherPageObj.searchCity(WeatherData.MoscowCity);
 			});
 
 			await test.step("Переключение на таб SM", async () => {
@@ -240,7 +235,7 @@ test.describe("Прогноз погоды", { tag: "@weather" }, () => {
 			});
 
 			await test.step("Отображение наименования города", async () => {
-				await expect(weatherPageObj.weatherLocationSm).toContainText(MoscowCity);
+				await expect(weatherPageObj.weatherLocationSm).toContainText(WeatherData.MoscowCity);
 			});
 
 			await test.step("Отображение иконки погоды", async () => {
