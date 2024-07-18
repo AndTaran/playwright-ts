@@ -1,19 +1,19 @@
-import { AuthDataType, BaseDataType, RegistrationDataType, WeatherDataType } from "./types";
+import { TAuthData, TBaseData, TRegistrationData, TWeatherData } from "../utils/types";
 
-export const BaseData: BaseDataType = {
+export const BaseData: TBaseData = {
 	url: "https://andtaran.github.io/weather_react/",
 	email: "test1@test.ru",
 	password: "123456",
 };
 
-export const AuthData: AuthDataType = {
+export const AuthData: TAuthData = {
 	title: "Регистрация/Авторизация",
 	invalidPassword: "12345",
 	errorFillEmailPassword: "Заполните email/пароль",
 	errorAccountNotFound: "Аккаунт не найден",
 };
 
-export const RegistrationData: RegistrationDataType = {
+export const RegistrationData: TRegistrationData = {
 	randomEmail: Math.random().toString(36).substring(2, 11) + "@domain.com",
 	invalidEmail: "test1",
 	errorInvalidEmail: "Firebase: Error (auth/invalid-email).",
@@ -22,7 +22,7 @@ export const RegistrationData: RegistrationDataType = {
 	errorFillFields: "Заполните все поля",
 };
 
-export const WeatherData: WeatherDataType = {
+export const WeatherData: TWeatherData = {
 	MoscowCity: "Москва",
 	KrasnodarCity: "Краснодар",
 	errorCityNotFound: "Город не найден...",
