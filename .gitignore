@@ -6,3 +6,5 @@ node_modules/
 .idea
 package-lock.json
 tests-examples
+allure-results/
+allure-report/

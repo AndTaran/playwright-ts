@@ -3,13 +3,33 @@
 -   [GitHub Pages](https://andtaran.github.io/weather_react/)
 -   [GitHub](https://github.com/AndTaran/weather_react)
 
-**Inside that directory, you can run several commands:**
+### And automated API tests for the service:
 
-Runs the end-to-end tests.
+-   [Restful-booker](https://restful-booker.herokuapp.com/apidoc/index.html)
+
+---
+
+**1. Install dependencies:**
+
+```
+npm install
+```
+
+**2. Run the tests:**
 
 ```
 npx playwright test
 ```
+
+**3. Generate allure report:**
+
+```
+npx allure serve
+```
+
+---
+
+**Other commands:**
 
 Starts the interactive UI mode.
 

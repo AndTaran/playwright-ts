@@ -1,34 +1,40 @@
 import { test, expect } from "@playwright/test";
+import { allure } from "allure-playwright";
 import LoginPage from "../pages/LoginPage";
 import WeatherPage from "../pages/WeatherPage";
 import { BaseData, WeatherData } from "../data/data";
 
-test.describe("Прогноз погоды", { tag: "@weather" }, () => {
-	test.describe.configure({ retries: 1 });
+let loginPageObj: LoginPage;
+let weatherPageObj: WeatherPage;
 
+test.beforeEach(async ({ page }) => {
+	loginPageObj = new LoginPage(page);
+	weatherPageObj = new WeatherPage(page);
+
+	await allure.epic("Прогноз погоды");
+	await allure.owner("Игорь Вестников");
+	await allure.description("Проверки на странице прогноза погоды");
+	await allure.link("Website", "https://andtaran.github.io/weather_react/", "Сайт weather_react");
+
+	await test.step("Открытие страницы", async () => {
+		await loginPageObj.goTo(BaseData.url);
+	});
+
+	await test.step("Авторизация", async () => {
+		await loginPageObj.login(BaseData.email, BaseData.password);
+	});
+});
+
+test.describe("Прогноз погоды", { tag: "@weather" }, () => {
 	test.use({
 		// Геолокация города Краснодар
 		geolocation: { longitude: 38.9764814, latitude: 45.0352718 },
 		permissions: ["geolocation"],
 	});
 
-	let loginPageObj: LoginPage;
-	let weatherPageObj: WeatherPage;
-
-	test.beforeEach(async ({ page }) => {
-		loginPageObj = new LoginPage(page);
-		weatherPageObj = new WeatherPage(page);
-
-		await test.step("Открытие страницы", async () => {
-			await loginPageObj.goTo(BaseData.url);
-		});
-
-		await test.step("Авторизация", async () => {
-			await loginPageObj.login(BaseData.email, BaseData.password);
-		});
-	});
-
 	test('Отображение страницы "Прогноз погоды"', async ({ page }) => {
+		await allure.severity("blocker");
+
 		await test.step("Отображение заголовка в шапке", async () => {
 			await expect(weatherPageObj.headerTitle).toHaveText(WeatherData.title);
 		});
@@ -39,6 +45,8 @@ test.describe("Прогноз погоды", { tag: "@weather" }, () => {
 	});
 
 	test("Поиск города и отображение виджета погоды", async ({ page }) => {
+		await allure.severity("blocker");
+
 		await test.step("Заполнение поля поиска", async () => {
 			await weatherPageObj.inputSearchCity.fill(WeatherData.MoscowCity);
 		});
@@ -57,6 +65,8 @@ test.describe("Прогноз погоды", { tag: "@weather" }, () => {
 	});
 
 	test("Смена города", async ({ page }) => {
+		await allure.severity("critical");
+
 		await test.step("Поиск города", async () => {
 			await weatherPageObj.searchCity(WeatherData.MoscowCity);
 		});
@@ -75,6 +85,8 @@ test.describe("Прогноз погоды", { tag: "@weather" }, () => {
 	});
 
 	test("Определение геопозиции", async ({ page }) => {
+		await allure.severity("critical");
+
 		await test.step("Отображение кнопки для определения геопозиции", async () => {
 			await expect(weatherPageObj.buttonGeoDetection).toBeVisible();
 		});
@@ -92,7 +104,9 @@ test.describe("Прогноз погоды", { tag: "@weather" }, () => {
 		});
 	});
 
-	test("Поиск несуществующего города и отображение ошибки", { tag: "@negative" }, async ({ page }) => {
+	test("(H) Поиск несуществующего города и отображение ошибки", { tag: "@negative" }, async ({ page }) => {
+		await allure.severity("minor");
+
 		await test.step("Поиск города", async () => {
 			await weatherPageObj.searchCity("Не существует города");
 		});
@@ -108,6 +122,8 @@ test.describe("Прогноз погоды", { tag: "@weather" }, () => {
 	});
 
 	test("Проверка переключения между виджетами", async ({ page }) => {
+		await allure.severity("critical");
+
 		await test.step("Поиск города", async () => {
 			await weatherPageObj.searchCity(WeatherData.MoscowCity);
 		});
@@ -138,6 +154,8 @@ test.describe("Прогноз погоды", { tag: "@weather" }, () => {
 
 	test.describe("Виджеты погоды", () => {
 		test("Отображение полей в большом виджете", async ({ page }) => {
+			await allure.severity("blocker");
+
 			await test.step("Поиск города", async () => {
 				await weatherPageObj.searchCity(WeatherData.MoscowCity);
 			});
@@ -188,6 +206,8 @@ test.describe("Прогноз погоды", { tag: "@weather" }, () => {
 		});
 
 		test("Отображение полей в среднем виджете", async ({ page }) => {
+			await allure.severity("blocker");
+
 			await test.step("Поиск города", async () => {
 				await weatherPageObj.searchCity(WeatherData.MoscowCity);
 			});
@@ -222,6 +242,8 @@ test.describe("Прогноз погоды", { tag: "@weather" }, () => {
 		});
 
 		test("Отображение полей в малом виджете", async ({ page }) => {
+			await allure.severity("blocker");
+
 			await test.step("Поиск города", async () => {
 				await weatherPageObj.searchCity(WeatherData.MoscowCity);
 			});
