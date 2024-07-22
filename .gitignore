@@ -4,7 +4,7 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 .idea
-package-lock.json
+# package-lock.json
 tests-examples
 allure-results/
 allure-report/
