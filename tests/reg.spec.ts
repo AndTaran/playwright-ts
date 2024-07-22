@@ -69,7 +69,7 @@ test.describe("Позитивные сценарии регистрации", { 
 	});
 });
 
-test.describe("Негативные сценарии регистрации", { tag: "@negative" }, () => {
+test.describe("Негативные сценарии регистрации", { tag: ["@registration", "@negative"] }, () => {
 	test("Регистрация с пустыми данными", async ({ page }) => {
 		await allure.severity("trivial");
 

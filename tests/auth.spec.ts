@@ -59,7 +59,7 @@ test.describe("Позитивные сценарии авторизации", { 
 	});
 });
 
-test.describe("Негативные сценарии авторизации", { tag: "@negative" }, () => {
+test.describe("Негативные сценарии авторизации", { tag: ["@auth", "@negative"] }, () => {
 	test("Авторизация с незаполненными полями", async ({ page }) => {
 		await allure.severity("minor");
 

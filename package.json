@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "npx allure generate --clean --output allure-results && npx playwright test --project=chromium && npx allure serve allure-results"
+    "test": "npx allure generate --clean --output allure-results && npx playwright test --project=chromium && npx allure serve"
   },
   "keywords": [],
   "author": "",

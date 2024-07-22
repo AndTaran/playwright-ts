@@ -1,0 +1,43 @@
+name: Playwright Tests
+on:
+    workflow_dispatch:
+        inputs:
+            deployment_target:
+                description: "Select test"
+                required: true
+                default: "All tests"
+                type: choice
+                options:
+                    - "All tests"
+                    - "Authorization"
+                    - "Registration"
+                    - "Weather"
+                    - "API"
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 18
+            - name: Install dependencies
+              run: npm ci
+            - name: Install Playwright Browsers
+              run: npx playwright install --with-deps
+            - name: Run All tests
+              if: ${{ github.event.inputs.deployment_target == 'All tests' }}
+              run: npx playwright test
+            - name: Run Authorization tests
+              if: ${{ github.event.inputs.deployment_target == 'Authorization' }}
+              run: npx playwright test --grep "@auth"
+            - name: Run Registration tests
+              if: ${{ github.event.inputs.deployment_target == 'Registration' }}
+              run: npx playwright test --grep "@registration"
+            - name: Run Weather tests
+              if: ${{ github.event.inputs.deployment_target == 'Weather' }}
+              run: npx playwright test --grep "@weather"
+            - name: Run API tests
+              if: ${{ github.event.inputs.deployment_target == 'API' }}
+              run: npx playwright test --grep "@API"
