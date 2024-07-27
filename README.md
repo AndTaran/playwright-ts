@@ -9,6 +9,14 @@
 
 ---
 
+#### Allure report on gh-page:
+
+-   [allure-report](https://andtaran.github.io/playwright-ts/)
+
+---
+
+### Local launch:
+
 **1. Install dependencies:**
 
 ```
